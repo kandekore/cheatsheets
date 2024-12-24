@@ -1,0 +1,191 @@
+Here’s a categorized **Dokku Cheat Sheet** 
+
+```markdown
+# Dokku Cheat Sheet
+
+A quick reference guide for managing apps and configurations with Dokku.
+
+---
+
+## **General Commands**
+- **List all apps**:  
+  ```bash
+  dokku apps:list
+  ```
+- **Create a new app**:  
+  ```bash
+  dokku apps:create <app-name>
+  ```
+- **Delete an app**:  
+  ```bash
+  dokku apps:destroy <app-name> --force
+  ```
+- **Show Dokku version**:  
+  ```bash
+  dokku version
+  ```
+
+---
+
+## **Deployment**
+- **Push code to deploy**:  
+  ```bash
+  git push dokku <branch>:main
+  ```
+- **Rebuild an app**:  
+  ```bash
+  dokku ps:rebuild <app-name>
+  ```
+- **Restart an app**:  
+  ```bash
+  dokku ps:restart <app-name>
+  ```
+
+---
+
+## **Logs and Debugging**
+- **View app logs**:  
+  ```bash
+  dokku logs <app-name>
+  ```
+- **Stream logs in real-time**:  
+  ```bash
+  dokku logs <app-name> --tail
+  ```
+- **Check NGINX error logs**:  
+  ```bash
+  sudo tail -n 50 /var/log/nginx/<app-name>-error.log
+  ```
+
+---
+
+## **Networking**
+- **Check container IP**:  
+  ```bash
+  docker inspect $(docker ps -q --filter "name=<app-name>.web.1") | grep IPAddress
+  ```
+- **Curl app internally**:  
+  ```bash
+  curl http://<container-ip>:<port>
+  ```
+
+---
+
+## **NGINX**
+- **Show NGINX configuration for an app**:  
+  ```bash
+  dokku nginx:show-config <app-name>
+  ```
+- **Reload NGINX**:  
+  ```bash
+  sudo systemctl reload nginx
+  ```
+- **Restart NGINX**:  
+  ```bash
+  sudo systemctl restart nginx
+  ```
+
+---
+
+## **Configuration**
+- **Set environment variables**:  
+  ```bash
+  dokku config:set <app-name> KEY=VALUE
+  ```
+- **View environment variables**:  
+  ```bash
+  dokku config <app-name>
+  ```
+- **Unset an environment variable**:  
+  ```bash
+  dokku config:unset <app-name> KEY
+  ```
+
+---
+
+## **Database**
+- **Connect to MongoDB Atlas**:  
+  Set the `MONGODB_URI` environment variable:  
+  ```bash
+  dokku config:set <app-name> MONGODB_URI="mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority"
+  ```
+- **Check database connectivity**:  
+  Test from inside the container:  
+  ```bash
+  docker exec -it $(docker ps -q --filter "name=<app-name>.web.1") bash
+  mongo --host <db-host> --port <db-port>
+  ```
+
+---
+
+## **DNS and Domains**
+- **Set a custom domain**:  
+  ```bash
+  dokku domains:add <app-name> <domain>
+  ```
+- **List app domains**:  
+  ```bash
+  dokku domains <app-name>
+  ```
+- **Remove a custom domain**:  
+  ```bash
+  dokku domains:remove <app-name> <domain>
+  ```
+
+---
+
+## **System Management**
+- **Update Dokku**:  
+  ```bash
+  wget https://dokku.com/install/v0.30.2/bootstrap.sh
+  sudo DOKKU_TAG=v0.30.2 bash bootstrap.sh
+  ```
+- **Check server status**:  
+  ```bash
+  sudo systemctl status nginx
+  ```
+- **Remove default NGINX site**:  
+  ```bash
+  sudo rm /etc/nginx/sites-enabled/default
+  sudo systemctl reload nginx
+  ```
+
+---
+
+## **Healthcheck**
+- **Add a healthcheck endpoint in `server.js`**:  
+  ```javascript
+  app.get("/health", async (req, res) => {
+    try {
+      await mongoose.connection.db.admin().ping();
+      res.status(200).send("Healthy");
+    } catch (err) {
+      res.status(500).send("Database not reachable");
+    }
+  });
+  ```
+
+Test it:
+```bash
+curl http://<domain>/health
+```
+
+---
+
+## **Docker Commands**
+- **List running containers**:  
+  ```bash
+  docker ps
+  ```
+- **Inspect a container**:  
+  ```bash
+  docker inspect $(docker ps -q --filter "name=<app-name>.web.1")
+  ```
+- **Fix Docker permissions**:  
+  Add user to Docker group:  
+  ```bash
+  sudo usermod -aG docker $USER
+  newgrp docker
+  ```
+
+---
