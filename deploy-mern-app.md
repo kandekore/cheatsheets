@@ -1,5 +1,3 @@
-Here is the same content in **Markdown** format. You can copy and save it as a `.md` file:
-
 ```md
 # MERN Deployment Cheat Sheet
 
