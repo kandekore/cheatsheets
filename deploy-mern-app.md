@@ -153,5 +153,3 @@ npm run build
 
 That’s it! These commands cover the most common tasks in a typical MERN deployment workflow with PM2 and Nginx.
 ```
-
-Simply rename the file to something like `mern-deployment-cheat-sheet.md` to keep it in markdown format.
